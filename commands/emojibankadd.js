@@ -8,7 +8,7 @@ module.exports = {
   usage: '<Attach an image (recommended) or link to an image (must be png)>',
     execute: async (message, args, client, db, gm) => {  
       if (args[1] === 'list') return message.reply('change the name of your emoji!');
-      if (db.get('emojibank').hasOwnProperty(args[1])) return message.reply('that emoji already exists!');
+      if (db.get('emojibank') && db.get('emojibank').hasOwnProperty(args[1])) return message.reply('that emoji already exists!');
       const attachIsImage = (msgAttach) => {
     var url = msgAttach.url;
     //True if this url is a png image.

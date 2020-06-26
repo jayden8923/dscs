@@ -40,7 +40,7 @@ message.channel.send(new d.MessageEmbed().setTitle('ERROR').setDescription(`\`\`
       if (typeof evaled !== "string")
         evaled = require("util").inspect(evaled);
  
-      message.channel.send(new d.MessageEmbed().setTitle('EVAL').setDescription('Output: ' + `\`\`\`x1\n${evaled}\`\`\``));
+      message.channel.send(new d.MessageEmbed().setTitle('EVAL').addField('Input', args.join(' ')).addField('Output:', `\`\`\`x1\n${evaled}\`\`\``));
     } catch (err) {
       console.error(err);
 message.channel.send(new d.MessageEmbed().setTitle('ERROR').setDescription(`\`\`\`x1\n${err}\`\`\``));

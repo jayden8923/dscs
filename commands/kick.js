@@ -5,7 +5,6 @@ execute(message, args, client, db) {
   if (!message.member.hasPermission('KICK_MEMBERS')) return message.reply('nah, no permission');
   const user = message.mentions.users.first();
   
-  user.roles.cache.forEach(role => { if (db.get('modroles').includes(role.id)) return message.reply('No permission!'); });
    if (user) {
       const member = message.guild.member(user);
       if (member) {

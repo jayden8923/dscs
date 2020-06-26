@@ -1,32 +1,23 @@
-const fs = require('fs');
-const Discord = require('discord.js');
+String.prototype.isASCII = () => /^[\x00-\x7F]*$/.test(this);
+require('dotenv').config();
+const fs = require('fs'),
+ Discord = require('discord.js');
 // Modules
-const random = require('random');
-const db = require('quick.db');
-const axios = require('axios');
-const reactions = require('./events/reactions.js');
-const cleverbot = require("cleverbot-free");
-const Enmap = require("enmap");
-const prefix = process.env.PREFIX;
-const token = process.env.TOKEN;
-
-const https = require('https');
-const express = require('express');
-const app = express();
-app.get("/", (request, response) => {
-  console.log(Date.now() + " Ping Received");
-  response.sendStatus(200);
-});
-
-setInterval(() => {
-  https.get(`https://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);
+const client = new Discord.Client({ ws: { intents: 32767 } });
+const enmap = require("enmap");
+client.db = new enmap({name: "db"});
+const random = require('random'),
+ Enmap = enmap,
+ db = client.db,
+ axios = require('axios'),
+ reactions = require('./events/reactions.js'),
+ cleverbot = require("cleverbot-free"),
+ prefix = process.env.PREFIX,
+ token = process.env.TOKEN;
 
 // Creates the bot  
-const client = new Discord.Client({ ws: { intents: 32767 } });
 
 client.commands = new Discord.Collection();
-client.emojisC = new Discord.Collection();
 client.points = new Enmap({name: "points"});
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -36,25 +27,6 @@ for (const file of commandFiles) {
 }
 // Load the commands
 
-fs.readdir("./commands/", (err, folders) => {
-  if (err) console.error(err);
-  var fld1 = './commands/economy';
-  fs.readdir(fld1, (e, files) => {
-      if (e) throw e;
-      try {
-        files.forEach(file => {
-      
-          var prop = require(`./commands/economy/${file}`);
-          client.commands.set(prop.name, prop);
-          prop.aliases.forEach(alias => {
-            client.commands.set(alias, prop);
-          });
-        });
-      } catch (er) {
-        throw er;
-      }
-    });
-  });
 
 const AntiSpam = require('discord-anti-spam');
 const antiSpam = new AntiSpam({
@@ -110,6 +82,10 @@ reactions.starboardRemove(client);
 
 // Events which you dont wanna touch
 client.on('guildMemberUpdate', (oldMember, newMember) => {
+  if (oldMember.displayName !== newMember.displayName) {
+if (!newMember.displayName.isASCII()) newMember.setNickname('pingable name');
+else if (newMember.nickname && !newMember.nickname.isASCII()) newMember.setNickname('pingable name');
+  }
   //if (newMember.user.id === '415238591455690753'/* || newMember.user.id === '529192006531022856'*/) {
  //   if (newMember.nickname !== 'Dickhead cocksucker')
   //   return newMember.setNickname('Dickhead cocksucker');
@@ -136,6 +112,7 @@ require('./events/emojiCreate');
 require('./events/emojiUpdate');
 
 client.on('guildMemberAdd', member => {
+  if (!member.displayName.isASCII()) member.setNickname('pingable name');
   const welcome = member.guild.channels.cache.get('645446735887597588') || member.guild.channels.cache.get('714664747504762912');
   if (member.guild.id === dscs) member.roles.add('714265338769834063');
   else member.roles.add('709984117714059315');
@@ -168,16 +145,6 @@ client.on('guildMemberAdd', member => {
   });
     db.set('invites', invites);
   
-});
-client.on("messageDelete", message => {
-  if (message.author.bot) return;
-
-  var snipes = db.get('snipes');
-  if (!snipes) db.set('snipes', {});
-  snipes[message.channel.id] = { message: `${message}`, tag: `${message.author.tag}`};
-  var fileName = './snipe.json';
-
-db.set('snipes', snipes);
 });
 
 client.on('guildMemberRemove', member => {
